@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CIPHER.EXE — Encryption Training OS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
+</head>
+<body>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#070B14"/>
+    <polygon points="50,20 80,35 80,65 50,80 20,65 20,35" fill="none" stroke="#4FC3F7" stroke-width="2"/>
+    <text x="50" y="56" text-anchor="middle" fill="#4FC3F7" font-family="monospace" font-size="18" font-weight="700">{ }</text>
+  </svg>
+</template>
+
+<div id="root"></div>
+
+<!-- Tweak defaults -->
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "cyan",
+  "font": "ui",
+  "difficulty": "normal",
+  "sound": true,
+  "startingLevel": "hub"
+}/*EDITMODE-END*/;
+</script>
+
+<script type="text/babel" src="js/store.jsx"></script>
+<script type="text/babel" src="js/ui.jsx"></script>
+<script type="text/babel" src="js/shell.jsx"></script>
+<script type="text/babel" src="js/hub.jsx"></script>
+<script type="text/babel" src="js/codex.jsx"></script>
+<script type="text/babel" src="js/levels-text.jsx"></script>
+<script type="text/babel" src="js/levels-2d.jsx"></script>
+<script type="text/babel" src="js/levels-3d.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+function TweaksPanel({ tweaks, setTweaks, onClose }) {
+  const accents = ['cyan', 'violet', 'mint', 'amber', 'coral'];
+  const fonts = ['ui', 'mono'];
+  const diffs = ['easy', 'normal', 'hard'];
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 20, right: 20, width: 320, zIndex: 800,
+      background: 'var(--elevated)', border: '1px solid var(--accent)',
+      boxShadow: '0 0 32px var(--accent-glow)',
+      clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)',
+    }}>
+      <div className="flex between center" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
+        <div className="mono accent" style={{ fontSize: 11, letterSpacing: '0.2em' }}>◆ TWEAKS</div>
+        <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>✕</button>
+      </div>
+      <div style={{ padding: 16 }}>
+        <div className="mono faint" style={{ fontSize: 10, letterSpacing: '0.2em' }}>ACCENT</div>
+        <div className="flex gap-2" style={{ marginTop: 8 }}>
+          {accents.map(a => (
+            <button key={a}
+              onClick={() => setTweaks({ ...tweaks, accent: a })}
+              style={{
+                width: 36, height: 36, cursor: 'pointer',
+                background: `oklch(0.78 0.15 ${a === 'cyan' ? 220 : a === 'violet' ? 290 : a === 'mint' ? 160 : a === 'amber' ? 80 : 25})`,
+                border: tweaks.accent === a ? '2px solid white' : '1px solid var(--border-strong)',
+                boxShadow: tweaks.accent === a ? '0 0 12px currentColor' : 'none',
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="mono faint" style={{ fontSize: 10, letterSpacing: '0.2em', marginTop: 16 }}>FONT</div>
+        <div className="flex gap-2" style={{ marginTop: 8 }}>
+          {fonts.map(f => (
+            <button key={f} onClick={() => setTweaks({ ...tweaks, font: f })}
+              style={{
+                flex: 1, padding: '8px', background: tweaks.font === f ? 'var(--accent-soft)' : 'var(--bg)',
+                border: `1px solid ${tweaks.font === f ? 'var(--accent)' : 'var(--border-strong)'}`,
+                color: tweaks.font === f ? 'var(--accent)' : 'var(--text)',
+                fontFamily: f === 'mono' ? 'var(--font-mono)' : 'var(--font-ui)',
+                fontSize: 12, cursor: 'pointer',
+              }}>{f.toUpperCase()}</button>
+          ))}
+        </div>
+
+        <div className="mono faint" style={{ fontSize: 10, letterSpacing: '0.2em', marginTop: 16 }}>DIFFICULTY</div>
+        <div className="flex gap-2" style={{ marginTop: 8 }}>
+          {diffs.map(d => (
+            <button key={d} onClick={() => setTweaks({ ...tweaks, difficulty: d })}
+              style={{
+                flex: 1, padding: '8px', background: tweaks.difficulty === d ? 'var(--accent-soft)' : 'var(--bg)',
+                border: `1px solid ${tweaks.difficulty === d ? 'var(--accent)' : 'var(--border-strong)'}`,
+                color: tweaks.difficulty === d ? 'var(--accent)' : 'var(--text)',
+                fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer',
+              }}>{d.toUpperCase()}</button>
+          ))}
+        </div>
+
+        <div className="flex between center" style={{ marginTop: 16 }}>
+          <div className="mono faint" style={{ fontSize: 10, letterSpacing: '0.2em' }}>SOUND SFX</div>
+          <button onClick={() => setTweaks({ ...tweaks, sound: !tweaks.sound })}
+            style={{
+              padding: '4px 12px', background: tweaks.sound ? 'var(--success-soft)' : 'var(--bg)',
+              border: `1px solid ${tweaks.sound ? 'var(--success)' : 'var(--border-strong)'}`,
+              color: tweaks.sound ? 'var(--success)' : 'var(--text-dim)',
+              fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer',
+            }}>{tweaks.sound ? '● ON' : '○ OFF'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [state, actions, setState] = useGameState();
+  const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+  const [editOpen, setEditOpen] = useState(false);
+
+  // Edit mode protocol
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.data?.type === '__activate_edit_mode') setEditOpen(true);
+      if (e.data?.type === '__deactivate_edit_mode') setEditOpen(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  // Persist tweaks
+  useEffect(() => {
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: tweaks }, '*');
+  }, [tweaks]);
+
+  // Apply tweaks
+  useEffect(() => {
+    document.documentElement.dataset.accent = tweaks.accent;
+    document.documentElement.dataset.font = tweaks.font;
+  }, [tweaks]);
+
+  // Route
+  let screen;
+  switch (state.view) {
+    case 'boot':     screen = <BootScreen state={state} actions={actions} />; break;
+    case 'profile':  screen = <ProfileScreen state={state} actions={actions} />; break;
+    case 'hub':      screen = <HubScreen state={state} actions={actions} />; break;
+    case 'level':    screen = <LevelRouter state={state} actions={actions} />; break;
+    case 'codex':    screen = <CodexScreen state={state} actions={actions} />; break;
+    case 'sandbox':  screen = <SandboxScreen state={state} actions={actions} />; break;
+    case 'daily':    screen = <DailyScreen state={state} actions={actions} />; break;
+    default:         screen = <HubScreen state={state} actions={actions} />;
+  }
+
+  return <>
+    {screen}
+    {editOpen && <TweaksPanel tweaks={tweaks} setTweaks={setTweaks} onClose={() => setEditOpen(false)} />}
+  </>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
